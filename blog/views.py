@@ -9,8 +9,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView
 from django.views.generic import UpdateView, DeleteView
 
+from django.contrib.auth.models import User
 from .models import Post, Comment, Profile
-from .forms import UserRegisterForm, PostForm
+from .forms import UserRegisterForm, PostForm, UserUpdateForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
 
 class HomePageView(ListView):
@@ -123,3 +124,50 @@ def delete_comment(request, pk):
         messages.success(request, 'Комментарий удален')
     
     return redirect('post_detail', pk=post_pk)
+
+@login_required
+def profile(request):
+    user = request.user
+    posts = Post.objects.filter(author=user).order_by('-date_posted')
+    
+    return render(request, 'blog/profile.html', {
+        'user': user,
+        'posts': posts,
+        'post_count': posts.count(),
+    })
+
+# Редактирование профиля
+@login_required
+def profile_edit(request):
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Профиль успешно обновлен!')
+            return redirect('profile')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+    
+    return render(request, 'blog/profile_edit.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    })
+
+# Удаление профиля
+@login_required
+def profile_delete(request):
+    if request.method == 'POST':
+        confirm_text = request.POST.get('confirm', '')
+        if confirm_text == 'УДАЛИТЬ':
+            user = request.user
+            user.delete()
+            messages.success(request, 'Аккаунт успешно удален!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Неверное подтверждение')
+    
+    return render(request, 'blog/profile_delete.html')

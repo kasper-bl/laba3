@@ -6,6 +6,8 @@ from .models import Profile, Post, Comment
 
 class UserRegisterForm(UserCreationForm):  
     email = forms.EmailField(required=True)
+    avatar = forms.ImageField 
+    bio = forms.CharField(required=True, widget=forms.Textarea(attrs={'rows': 3}))
     
     class Meta:
         model = User
@@ -16,11 +18,13 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = ['username', 'email']
 
-class ProfileUpdateForm(forms.ModelForm): 
+class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar', 'bio']
-
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Расскажите о себе...'}),
+        }
 
 class PostForm(forms.ModelForm):  
     class Meta:

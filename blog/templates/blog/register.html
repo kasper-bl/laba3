@@ -50,13 +50,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="id_first_name" class="form-label">Имя (необязательно)</label>
-                            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ form.first_name.value|default:'' }}">
+                            <label for="id_avatar" class="form-label">Аватар</label>
+                            <input type="file" name="avatar" id="id_avatar" class="form-control">
                         </div>
 
                         <div class="mb-3">
-                            <label for="id_last_name" class="form-label">Фамилия (необязательно)</label>
-                            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ form.last_name.value|default:'' }}">
+                            <label for="id_bio" class="form-label">Био</label>
+                            <textarea name="bio" id="id_bio" class="form-control" rows="3">{{ form.bio.value|default:'' }}</textarea>
                         </div>
 
                         <div class="d-grid gap-2">

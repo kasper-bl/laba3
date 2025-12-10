@@ -38,17 +38,11 @@
         </div>
     {% endfor %}
 {% else %}
-    <div class="alert alert-info">
+    <div class="container">
         Пока нет постов.
-        {% if user.is_authenticated %}
-            <button class="btn btn-sm btn-outline-secondary" disabled>Создать пост</button>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn btn-sm btn-primary">Войти</a>
-        {% endif %}
     </div>
 {% endif %}
 
-<!-- Пагинация -->
 {% if is_paginated %}
     <nav aria-label="Навигация по страницам" class="mt-4">
         <ul class="pagination justify-content-center">
