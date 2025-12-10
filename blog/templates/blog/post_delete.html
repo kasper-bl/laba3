@@ -1,0 +1,69 @@
+<!-- blog/templates/blog/post_confirm_delete.html -->
+{% extends 'blog/base.html' %}
+
+{% block title %}Удалить пост - Мой Блог{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Подтверждение удаления
+                    </h2>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Предупреждение -->
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-exclamation-octagon-fill"></i> Внимание!
+                        </h5>
+                        <p class="mb-0">
+                            Вы собираетесь удалить пост "<strong>{{ object.title }}</strong>".
+                            Это действие нельзя отменить.
+                        </p>
+                    </div>
+                    
+                    <!-- Информация о посте -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ object.title }}</h5>
+                            <p class="card-text text-muted">
+                                <small>
+                                    <i class="bi bi-person"></i> Автор: {{ object.author.username }}<br>
+                                    <i class="bi bi-calendar"></i> Дата: {{ object.created_at|date:"d.m.Y H:i" }}<br>
+                                    <i class="bi bi-chat"></i> Комментариев: {{ object.total_comments }}<br>
+                                    <i class="bi bi-heart"></i> Лайков: {{ object.total_likes }}
+                                </small>
+                            </p>
+                            <hr>
+                            <p class="card-text">
+                                {{ object.content|truncatechars:200 }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Форма удаления -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <!-- Кнопка отмены -->
+                            <a href="{% url 'post_detail' object.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Отмена
+                            </a>
+                            
+                            <!-- Кнопка удаления -->
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Да, удалить пост
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

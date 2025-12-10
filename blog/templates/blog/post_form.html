@@ -1,0 +1,90 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}
+    {% if object %}Редактировать пост{% else %}Создать пост{% endif %} - Мой Блог
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header {% if object %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
+                    <h2 class="mb-0">
+                        <i class="bi {% if object %}bi-pencil{% else %}bi-plus-circle{% endif %} me-2"></i>
+                        {% if object %}Редактировать пост{% else %}Создать новый пост{% endif %}
+                    </h2>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Ошибка!</strong> Пожалуйста, исправьте ошибки ниже.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <label for="id_title" class="form-label fw-bold">Заголовок поста</label>
+                            <input type="text" 
+                                   name="title" 
+                                   id="id_title"
+                                   class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}" 
+                                   placeholder="Введите заголовок поста"
+                                   required
+                                   maxlength="100"
+                                   value="{{ form.title.value|default:'' }}">
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.title.errors|first }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Максимум 100 символов
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_content" class="form-label fw-bold">Содержание поста</label>
+                            <textarea name="content" 
+                                      id="id_content"
+                                      class="form-control {% if form.content.errors %}is-invalid{% endif %}" 
+                                      rows="8"
+                                      placeholder="Напишите содержание вашего поста..."
+                                      required
+                                      maxlength="400">{{ form.content.value|default:'' }}</textarea>
+                            {% if form.content.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.content.errors|first }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Максимум 400 символов
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            {% if object %}
+                                <a href="{% url 'post_detail' object.pk %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Отмена
+                                </a>
+                            {% else %}
+                                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Отмена
+                                </a>
+                            {% endif %}
+                            
+                            <button type="submit" class="btn {% if object %}btn-warning{% else %}btn-success{% endif %}">
+                                <i class="bi {% if object %}bi-check-circle{% else %}bi-plus-circle{% endif %}"></i>
+                                {% if object %}Сохранить изменения{% else %}Опубликовать пост{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
