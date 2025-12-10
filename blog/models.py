@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User 
 from django.urls import reverse
+from django.utils import timezone
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
@@ -14,26 +15,26 @@ class Profile(models.Model):
         return reverse('profile', kwargs={'username': self.user.username})
 
 class Post(models.Model):
-    author = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'posts')
-    created_at = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=100, blank=False)
-    content = models.TextField(max_length=400, verbose_name='Описание поста')
-    likes = models.ManyToManyField(User, blank=True, related_name='liked_posts')
-
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    date_posted = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.ManyToManyField(User, related_name='post_likes', blank=True)
+    
     def __str__(self):
-        return f'{self.title}'
+        return self.title
+    
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.pk})
     
     def total_likes(self):
         return self.likes.count()
-    
-    def get_absolute_url(self):
-        return reverse('post', kwargs={'pk': self.pk })
     
     def total_comments(self):
         return self.comments.count()
     
     class Meta:
-        ordering =['-created_at']
+        ordering = ['-date_posted']
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name = 'comments')
@@ -48,3 +49,6 @@ class Comment(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Комментарий'
+
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'pk': self.post.pk})

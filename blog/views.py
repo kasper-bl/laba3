@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,6 +11,7 @@ from django.views.generic import UpdateView, DeleteView
 
 from .models import Post, Comment, Profile
 from .forms import UserRegisterForm, PostForm
+from django.contrib.auth.decorators import login_required
 
 class HomePageView(ListView):
 
@@ -21,10 +23,33 @@ class HomePageView(ListView):
     def get_queryset(self):
         return Post.objects.all()
     
-class PostDetailView(DetailView):
-    model = Post
-    context_object_name = 'post'
-    template_name = 'blog/post_detail.html'
+def post_detail(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    
+    # Обработка комментария
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, 'Для комментариев нужно войти в систему')
+            return redirect('login')
+        
+        content = request.POST.get('content', '').strip()
+        if content:
+            Comment.objects.create(
+                post=post,
+                author=request.user,
+                content=content
+            )
+
+        messages.success(request, 'Комментарий добавлен!')
+        return redirect('post_detail', pk=pk)
+    
+    # GET запрос
+    comments = post.comments.all().order_by('-created_at')
+    
+    return render(request, 'blog/post_detail.html', {
+        'post': post,
+        'comments': comments,
+})
 
 class RegisterView(CreateView):
     form_class = UserRegisterForm
@@ -72,3 +97,29 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Пост успешно удален!')
         return super().delete(request, *args, **kwargs)
+    
+@login_required
+def like_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        messages.info(request, 'Лайк убран')
+    else:
+        post.likes.add(request.user)
+        messages.success(request, 'Лайк добавлен')
+    
+    return redirect('post_detail', pk=pk)
+
+@login_required
+def delete_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    post_pk = comment.post.pk
+    
+    if comment.author != request.user:
+        messages.error(request, 'Вы не можете удалить этот комментарий')
+    else:
+        comment.delete()
+        messages.success(request, 'Комментарий удален')
+    
+    return redirect('post_detail', pk=post_pk)

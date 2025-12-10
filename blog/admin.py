@@ -1,20 +1,22 @@
 from django.contrib import admin
-from .models import Post, Comment, Profile
+from .models import Profile, Post, Comment
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'avatar']
+    search_fields = ['user__username', 'bio']
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('author', 'created_at', 'title', 'total_likes_display')
-    list_filter = ('created_at', 'author')
-    date_hierarchy = 'created_at'
-
-    def total_likes_display(self, obj):
-        return obj.total_likes()
-    
-    total_likes_display.short_description = 'Лайки'
+    list_display = ['title', 'author', 'date_posted', 'total_likes', 'total_comments']
+    list_filter = ['date_posted', 'author']
+    search_fields = ['title', 'content']
+    date_hierarchy = 'date_posted'
+    filter_horizontal = ['likes']
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('content', 'post', 'created_at')
-    list_filter = ('created_at',)
-
-admin.site.register(Profile)
+    list_display = ['post', 'author', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'author']
+    search_fields = ['content', 'post__title']
+    date_hierarchy = 'created_at'
